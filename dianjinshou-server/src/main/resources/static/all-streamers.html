@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>主播库 - 点金手</title>
+<link rel="stylesheet" href="/assets/streamer-list.css">
+</head>
+<body>
+<div class="container">
+  <div class="page-head">
+    <div>
+      <div class="page-title">主播库</div>
+      <div class="page-desc">展示系统收录的全部主播。浏览无需登录。</div>
+    </div>
+    <div>
+      <a class="btn ghost" href="/my-streamers.html">查看我的主播 →</a>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <input id="searchInput" class="search-input" placeholder="搜索主播昵称" autocomplete="off">
+    <button id="searchBtn" class="btn">查询</button>
+    <button id="resetBtn" class="btn ghost">重置</button>
+  </div>
+
+  <div class="card">
+    <table class="tbl">
+      <thead>
+        <tr>
+          <th style="width:38%">主播</th>
+          <th>平台</th>
+          <th>账号 ID</th>
+          <th style="text-align:right">累计场次</th>
+          <th style="text-align:right">今日场次</th>
+          <th>最后开播</th>
+        </tr>
+      </thead>
+      <tbody id="tbody">
+        <tr><td colspan="6" class="loading">加载中…</td></tr>
+      </tbody>
+    </table>
+    <div class="pager">
+      <span class="info" id="pageInfo">—</span>
+      <button id="prevBtn" class="btn ghost" disabled>上一页</button>
+      <button id="nextBtn" class="btn ghost" disabled>下一页</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const PLATFORM_LABEL = { douyin: '抖音', kuaishou: '快手', shipinhao: '视频号' };
+const ACCOUNT_TYPE_LABEL = { own: '自有账号', industry: '同行业账号' };
+
+const state = { page: 1, size: 20, total: 0, keyword: '' };
+
+function fmtTime(iso) {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return iso;
+  const pad = (n) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+function escapeHtml(s) {
+  if (s == null) return '';
+  return String(s).replace(/[&<>"']/g, (c) => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+}
+
+function renderAvatar(s) {
+  const firstChar = (s.anchorName || '?').charAt(0);
+  const gCls = s.platform === 'kuaishou' ? 'g2' : s.platform === 'shipinhao' ? 'g3' : '';
+  const pfCls = s.platform || '';
+  const pfLabel = (PLATFORM_LABEL[s.platform] || '').charAt(0);
+  const avatarImg = s.anchorAvatar
+    ? `<img src="${escapeHtml(s.anchorAvatar)}" alt="" referrerpolicy="no-referrer" onerror="this.style.display='none';this.nextElementSibling.style.display=''">`
+    : '';
+  const textFallback = `<span${s.anchorAvatar ? ' style="display:none"' : ''}>${escapeHtml(firstChar)}</span>`;
+  return `<div class="av ${gCls}">${avatarImg}${textFallback}${pfLabel ? `<span class="pf ${pfCls}">${pfLabel}</span>` : ''}</div>`;
+}
+
+function renderRow(s) {
+  return `
+    <tr>
+      <td>
+        <div class="anchor-cell">
+          ${renderAvatar(s)}
+          <div>
+            <div class="anchor-name">${escapeHtml(s.anchorName) || '—'}</div>
+            <div class="anchor-meta">
+              <span class="badge ${s.accountType === 'own' ? 'own' : 'peer'}">${escapeHtml(ACCOUNT_TYPE_LABEL[s.accountType] || s.accountType || '')}</span>
+            </div>
+          </div>
+        </div>
+      </td>
+      <td>${escapeHtml(PLATFORM_LABEL[s.platform] || s.platform || '—')}</td>
+      <td><span class="account-id">${escapeHtml(s.accountId || '—')}</span></td>
+      <td style="text-align:right"><span class="num">${s.totalSessions ?? 0}</span></td>
+      <td style="text-align:right"><span class="num">${s.todaySessions ?? 0}</span></td>
+      <td><span class="time">${fmtTime(s.lastLiveAt)}</span></td>
+    </tr>
+  `;
+}
+
+async function load() {
+  const tbody = document.getElementById('tbody');
+  tbody.innerHTML = '<tr><td colspan="6" class="loading">加载中…</td></tr>';
+
+  const params = new URLSearchParams({ page: state.page, size: state.size });
+  if (state.keyword) params.set('keyword', state.keyword);
+
+  try {
+    const resp = await fetch(`/api/v1/public/streamers?${params}`);
+    const body = await resp.json();
+    if (body.code !== 200) {
+      tbody.innerHTML = `<tr><td colspan="6" class="empty"><div class="ic">⚠️</div>${escapeHtml(body.message || '加载失败')}</td></tr>`;
+      return;
+    }
+    const items = body.data?.items || [];
+    state.total = body.data?.total ?? 0;
+
+    if (items.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" class="empty"><div class="ic">📋</div>没有找到主播</td></tr>';
+    } else {
+      tbody.innerHTML = items.map(renderRow).join('');
+    }
+    updatePager();
+  } catch (err) {
+    tbody.innerHTML = `<tr><td colspan="6" class="empty"><div class="ic">❌</div>网络错误：${escapeHtml(err.message)}</td></tr>`;
+  }
+}
+
+function updatePager() {
+  const totalPages = Math.max(1, Math.ceil(state.total / state.size));
+  document.getElementById('pageInfo').textContent = `共 ${state.total} 条 · 第 ${state.page} / ${totalPages} 页`;
+  document.getElementById('prevBtn').disabled = state.page <= 1;
+  document.getElementById('nextBtn').disabled = state.page >= totalPages;
+}
+
+document.getElementById('searchBtn').addEventListener('click', () => {
+  state.keyword = document.getElementById('searchInput').value.trim();
+  state.page = 1; load();
+});
+document.getElementById('resetBtn').addEventListener('click', () => {
+  document.getElementById('searchInput').value = '';
+  state.keyword = ''; state.page = 1; load();
+});
+document.getElementById('searchInput').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') document.getElementById('searchBtn').click();
+});
+document.getElementById('prevBtn').addEventListener('click', () => { if (state.page > 1) { state.page--; load(); } });
+document.getElementById('nextBtn').addEventListener('click', () => { state.page++; load(); });
+
+load();
+</script>
+</body>
+</html>

@@ -1,0 +1,99 @@
+/* arco-overrides.css — Make Arco Design match "Refined Command Center" design */
+
+/* Override Arco's CSS variables */
+:root {
+  --color-bg-1: var(--bg);
+  --color-bg-2: var(--card);
+  --color-bg-3: var(--hov);
+  --color-bg-4: var(--press);
+  --color-text-1: var(--text-1);
+  --color-text-2: var(--text-2);
+  --color-text-3: var(--text-3);
+  --color-text-4: var(--text-4);
+  --color-border: var(--line);
+  --color-border-2: var(--line-2);
+  --color-border-3: var(--line-3);
+  --color-primary-6: var(--brand);
+  --color-primary-5: var(--brand-dark);
+  --color-primary-4: var(--brand-light);
+  --color-primary-light-1: var(--brand-soft);
+  --color-primary-light-2: var(--brand-soft-06);
+  --color-danger-6: var(--red);
+  --color-success-6: var(--green);
+  --color-warning-6: var(--gold);
+}
+
+/* Global font */
+.arco-menu, .arco-table, .arco-btn, .arco-input, .arco-select, .arco-modal, .arco-drawer {
+  font-family: var(--ff);
+}
+
+/* Menu */
+.arco-menu-item { border-radius: var(--radius-sm) !important; font-size: 13.5px; font-weight: 450; }
+.arco-menu-item.arco-menu-selected {
+  background: var(--brand-soft) !important;
+  color: var(--brand) !important; font-weight: 600;
+}
+.arco-menu-item:hover { background: var(--hov) !important; }
+
+/* Table */
+.arco-table th {
+  font-size: 11.5px !important; color: var(--text-3) !important; font-weight: 650 !important;
+  text-transform: uppercase; letter-spacing: .06em;
+  background: linear-gradient(180deg, rgba(36,30,24,.03), rgba(36,30,24,.012)) !important;
+}
+.arco-table td { font-size: 13.5px; color: var(--text-2b); }
+.arco-table-tr:hover {
+  background: linear-gradient(90deg, rgba(184,130,58,.02), rgba(184,130,58,.035) 50%, rgba(184,130,58,.02)) !important;
+}
+.arco-table-border .arco-table-th, .arco-table-border .arco-table-td {
+  border-color: var(--line-2) !important;
+}
+
+/* Button */
+.arco-btn { border-radius: var(--radius-md) !important; font-weight: 600; }
+.arco-btn-primary {
+  background: linear-gradient(180deg, var(--brand-lighter) 0%, var(--brand-light) 35%, var(--brand) 65%, var(--brand-dark) 100%) !important;
+  border-color: var(--brand-dark) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.28), 0 1px 3px rgba(143,98,36,.25);
+}
+.arco-btn-primary:hover {
+  background: linear-gradient(180deg, #F2D28A 0%, var(--brand-lighter) 35%, var(--brand-light) 70%, var(--brand) 100%) !important;
+  transform: translateY(-1px);
+}
+
+/* Input & Select */
+.arco-input-wrapper, .arco-select-view-single {
+  border-radius: var(--radius-md) !important;
+  border-color: var(--line) !important;
+}
+.arco-input-wrapper:focus-within, .arco-select-view-single.arco-select-view-focus {
+  border-color: var(--brand) !important;
+  box-shadow: 0 0 0 3px var(--brand-soft) !important;
+}
+
+/* Tabs */
+.arco-tabs-nav-ink {
+  background: linear-gradient(90deg, var(--brand-lighter), var(--brand), var(--brand-dark)) !important;
+  height: 2.5px !important;
+}
+.arco-tabs-tab { font-size: 14px; color: var(--text-3); }
+.arco-tabs-tab-active { color: var(--brand) !important; font-weight: 650; }
+
+/* Modal & Drawer */
+.arco-modal { border-radius: var(--radius) !important; }
+.arco-drawer { box-shadow: -8px 0 48px rgba(26,22,18,.14), -2px 0 6px rgba(26,22,18,.05) !important; }
+
+/* Message / Notification */
+.arco-message { border-radius: var(--radius-lg) !important; }
+
+/* Checkbox */
+.arco-checkbox-checked .arco-checkbox-icon {
+  background: linear-gradient(180deg, var(--brand-lighter), var(--brand)) !important;
+  border-color: var(--brand-dark) !important;
+}
+
+/* Switch */
+.arco-switch-checked {
+  background: linear-gradient(180deg, var(--brand-lighter), var(--brand-light) 50%, var(--brand)) !important;
+}

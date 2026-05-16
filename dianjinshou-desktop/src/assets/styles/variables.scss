@@ -1,0 +1,77 @@
+// Light theme (default) — "Refined Command Center" 设计稿
+:root {
+  --color-bg-1: #F4F2EC;
+  --color-bg-2: #FDFCF8;
+  --color-bg-3: #EFEDE3;
+  --color-bg-4: #E2DFD3;
+  --color-text-1: #19140F;
+  --color-text-2: #2A241E;
+  --color-text-3: #8A8174;
+  --color-text-4: #B8B0A0;
+  --color-border: rgba(36,30,24,.055);
+  --color-border-2: rgba(36,30,24,.035);
+  --color-border-3: rgba(36,30,24,.165);
+  --color-fill-1: #F4F2EC;
+  --color-fill-2: #EFEDE3;
+  --color-fill-3: rgba(36,30,24,.06);
+  --color-primary: #B8823A;
+  --color-primary-light: rgba(184,130,58,.12);
+  --color-success: #3E7A5C;
+  --color-warning: #A8760E;
+  --color-danger: #B8443C;
+}
+
+// Dark theme
+[data-theme='dark'] {
+  --color-bg-1: #141210;
+  --color-bg-2: #1E1B16;
+  --color-bg-3: #282420;
+  --color-bg-4: #32302A;
+  --color-text-1: #E8E2D8;
+  --color-text-2: #C4BCA8;
+  --color-text-3: #8A8174;
+  --color-text-4: #5A5348;
+  --color-border: rgba(200,180,150,.12);
+  --color-border-2: rgba(200,180,150,.06);
+  --color-border-3: rgba(200,180,150,.20);
+  --color-fill-1: #1E1B16;
+  --color-fill-2: #282420;
+  --color-fill-3: rgba(200,180,150,.12);
+  --color-primary: #D09E4E;
+  --color-primary-light: rgba(208,158,78,.12);
+  --color-success: #5A9A78;
+  --color-warning: #C89020;
+  --color-danger: #CC5A52;
+
+  // Override design-system tokens for dark mode
+  --bg: #141210;
+  --card: #1E1B16;
+  --card-hover: #232018;
+  --hov: #282420;
+  --press: #32302A;
+  --line: rgba(200,180,150,.12);
+  --line-2: rgba(200,180,150,.06);
+  --line-3: rgba(200,180,150,.20);
+  --text-1: #E8E2D8;
+  --text-2: #C4BCA8;
+  --text-2b: #9A9284;
+  --text-3: #8A8174;
+  --text-4: #5A5348;
+  --brand: #D09E4E;
+  --brand-light: #E8BE74;
+  --brand-lighter: #F4D99B;
+  --brand-dark: #B8823A;
+  --brand-deep: #8F6224;
+  --brand-soft: rgba(208,158,78,.16);
+  --brand-soft-12: rgba(208,158,78,.12);
+  --brand-soft-06: rgba(208,158,78,.06);
+  --brand-soft-03: rgba(208,158,78,.03);
+  --green: #5A9A78;
+  --green-soft: rgba(90,154,120,.10);
+  --red: #CC5A52;
+  --red-light: #E07068;
+  --red-dark: #A04038;
+  --red-soft: rgba(204,90,82,.08);
+  --gold: #C89020;
+  --gold-soft: rgba(200,144,32,.10);
+}

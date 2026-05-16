@@ -1,0 +1,62 @@
+{
+  "name": "dianjinshou-desktop",
+  "version": "1.1.6",
+  "description": "点金手 - AI 直播复盘分析系统。自动录制抖音直播、AI 全场复盘、话术切片分析、多场对比。",
+  "author": {
+    "name": "dianjinshou",
+    "email": "support@dianjinshou.cc"
+  },
+  "homepage": "https://livereview.dianjinshou.cc/",
+  "license": "Proprietary",
+  "main": "./out/main/index.js",
+  "scripts": {
+    "dev": "electron-vite dev",
+    "build": "electron-vite build",
+    "preview": "electron-vite preview",
+    "postinstall": "electron-builder install-app-deps",
+    "build:win": "npm run build && electron-builder --win --config",
+    "build:mac": "npm run build && electron-builder --mac --config",
+    "build:linux": "npm run build && electron-builder --linux --config",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:debug": "playwright test --debug",
+    "test:e2e:report": "playwright show-report"
+  },
+  "dependencies": {
+    "@arco-design/web-vue": "^2.56.3",
+    "@tiptap/extension-highlight": "^3.22.3",
+    "@tiptap/extension-text-align": "^3.22.3",
+    "@tiptap/extension-underline": "^3.22.3",
+    "@tiptap/pm": "^3.22.3",
+    "@tiptap/starter-kit": "^3.22.3",
+    "@tiptap/vue-3": "^3.22.3",
+    "axios": "^1.7.9",
+    "echarts": "^6.0.0",
+    "electron-updater": "^6.8.3",
+    "form-data": "^4.0.5",
+    "pinia": "^2.3.0",
+    "sherpa-onnx": "^1.12.37",
+    "vue": "^3.5.13",
+    "vue-router": "^4.5.0"
+  },
+  "devDependencies": {
+    "@electron-toolkit/preload": "^3.0.0",
+    "@electron-toolkit/tsconfig": "^1.0.1",
+    "@electron-toolkit/utils": "^3.0.0",
+    "@playwright/test": "^1.48.0",
+    "@vitejs/plugin-vue": "^5.2.1",
+    "@vue/test-utils": "^2.4.6",
+    "electron": "^33.2.1",
+    "electron-builder": "^25.1.8",
+    "electron-vite": "^2.3.0",
+    "ffmpeg-static": "^5.3.0",
+    "jsdom": "^29.0.2",
+    "sass": "^1.83.1",
+    "typescript": "^5.7.2",
+    "vite": "^6.0.7",
+    "vitest": "^4.1.4",
+    "vue-tsc": "^2.2.0"
+  }
+}

@@ -1,0 +1,77 @@
+spring:
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/dianjinshou?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai}
+    username: ${SPRING_DATASOURCE_USERNAME:root}
+    password: ${SPRING_DATASOURCE_PASSWORD:}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      idle-timeout: 300000
+
+  redis:
+    host: ${SPRING_REDIS_HOST:localhost}
+    port: ${SPRING_REDIS_PORT:6379}
+
+  rabbitmq:
+    host: ${SPRING_RABBITMQ_HOST:localhost}
+    port: ${SPRING_RABBITMQ_PORT:5672}
+    username: ${SPRING_RABBITMQ_USERNAME:guest}
+    password: ${SPRING_RABBITMQ_PASSWORD:}
+
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+
+storage:
+  type: ${STORAGE_TYPE:minio}
+  endpoint: ${STORAGE_ENDPOINT:}
+  access-key: ${STORAGE_ACCESS_KEY:}
+  secret-key: ${STORAGE_SECRET_KEY:}
+  bucket-recordings: ${STORAGE_BUCKET_RECORDINGS:}
+  bucket-files: ${STORAGE_BUCKET_FILES:}
+  bucket-clips: ${STORAGE_BUCKET_CLIPS:}
+  presigned-url-expire-seconds: 3600
+
+tencent:
+  cos:
+    enabled: ${TENCENT_COS_ENABLED:false}
+    secret-id: ${TENCENT_COS_SECRET_ID:}
+    secret-key: ${TENCENT_COS_SECRET_KEY:}
+    bucket: ${TENCENT_COS_BUCKET:}
+    region: ${TENCENT_COS_REGION:ap-beijing}
+    endpoint: ${TENCENT_COS_ENDPOINT:}
+    quota-bytes: ${TENCENT_COS_QUOTA_BYTES:21474836480}
+    read-url-expire-hours: ${TENCENT_COS_READ_URL_EXPIRE_HOURS:24}
+    upload-credential-expire-seconds: ${TENCENT_COS_UPLOAD_CREDENTIAL_EXPIRE_SECONDS:1800}
+
+dianjinshou:
+  jwt:
+    secret: ${JWT_SECRET:change-me-in-production}
+    access-token-ttl: 7200
+    refresh-token-ttl: 1296000
+  asr:
+    provider: disabled
+  ai:
+    provider: ${AI_PROVIDER:yunwu}
+    yunwu-api-key: ${YUNWU_API_KEY:}
+    yunwu-endpoint: ${YUNWU_ENDPOINT:https://api.yunwu.ai/v1}
+    yunwu-model: ${YUNWU_MODEL:gpt-4o-mini}
+  sms:
+    enabled: true
+    bypass-code: ${SMS_BYPASS_CODE:1234}
+    code-ttl-seconds: 300
+    throttle-seconds: 60
+    phone-hour-limit: 10
+    phone-day-limit: 20
+    ip-day-limit: 50
+    dahan:
+      endpoint: ${SMS_DAHAN_ENDPOINT:https://dhst.bangkao.com/json/sms/Submit}
+      account: ${SMS_DAHAN_ACCOUNT:}
+      password: ${SMS_DAHAN_PASSWORD:}
+      sign: ${SMS_DAHAN_SIGN:重庆学东科技}
+
+logging:
+  level:
+    root: INFO
+    com.dianjinshou: INFO

@@ -1,0 +1,99 @@
+appId: com.dianjinshou.desktop
+productName: 点金手
+copyright: Copyright © 2026 dianjinshou
+directories:
+  buildResources: build
+files:
+  - '!**/.vscode/*'
+  - '!src/*'
+  - '!electron/*'
+  - '!{.eslintignore,.eslintrc.cjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md}'
+  - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
+# sherpa-onnx 是 WASM 但仍需从磁盘 require .wasm 文件（不能直接从 asar 内读取）
+asarUnpack:
+  - node_modules/sherpa-onnx/**
+forceCodeSigning: false
+win:
+  executableName: dianjinshou-desktop
+  icon: resources/icons/app-icon.ico
+  # 以下元数据都写入 exe 的 VersionInfo 资源 —— 杀软会读取，"未知发布者"比"有发布者名"误报率更高
+  publisherName: dianjinshou
+  legalTrademarks: 点金手直播复盘系统
+  requestedExecutionLevel: asInvoker
+  # 未签名 + 启用 signAndEditExecutable 会让 electron-builder 去 hack exe header，反而触发杀软
+  signAndEditExecutable: false
+  # 未签名时关掉 autoUpdater 的签名校验，否则 updater 会拒绝任何非签名包
+  verifyUpdateCodeSignature: false
+  target:
+    - target: nsis
+      arch:
+        - x64
+  extraResources:
+    - from: resources/icons/app-icon.ico
+      to: icon.ico
+    - from: node_modules/ffmpeg-static/ffmpeg.exe
+      to: ffmpeg/ffmpeg.exe
+    - from: build/sherpa-models/paraformer-zh
+      to: sherpa-models/paraformer-zh
+    - from: build/sherpa-models/punct-zh-en
+      to: sherpa-models/punct-zh-en
+nsis:
+  artifactName: ${name}-${version}-setup.${ext}
+  shortcutName: 点金手
+  uninstallDisplayName: 点金手 ${version}
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: always
+  # 关增量包：每版本独立完整安装包，减少杀软对"下载器类"的启发式
+  differentialPackage: false
+  runAfterFinish: false
+  deleteAppDataOnUninstall: false
+mac:
+  icon: resources/icons/app-icon.icns
+  category: public.app-category.business
+  forceCodeSigning: true
+  hardenedRuntime: true
+  gatekeeperAssess: false
+  notarize: true
+  entitlements: build/entitlements.mac.plist
+  entitlementsInherit: build/entitlements.mac.plist
+  extendInfo:
+    NSDocumentsFolderUsageDescription: 需要访问"文稿"目录以保存录制的直播视频与分析结果。
+    NSDownloadsFolderUsageDescription: 需要访问"下载"目录以导出复盘报告。
+  target:
+    - target: dmg
+      arch:
+        - arm64
+  extraResources:
+    - from: node_modules/ffmpeg-static/ffmpeg
+      to: ffmpeg/ffmpeg
+    - from: build/sherpa-models/paraformer-zh
+      to: sherpa-models/paraformer-zh
+    - from: build/sherpa-models/punct-zh-en
+      to: sherpa-models/punct-zh-en
+dmg:
+  artifactName: ${productName}-${version}-arm64.${ext}
+  title: ${productName} ${version}
+  icon: resources/icons/app-icon.icns
+  contents:
+    - x: 180
+      y: 170
+    - x: 420
+      y: 170
+      type: link
+      path: /Applications
+linux:
+  icon: resources/icons/app-icon.png
+  target:
+    - target: AppImage
+      arch:
+        - x64
+  extraResources:
+    - from: resources/icons/app-icon.png
+      to: icon.png
+  maintainer: dianjinshou
+  category: Utility
+publish:
+  provider: generic
+  url: http://localhost:18081/desktop
+  # 客户端对 latest.yml 做 SHA-512 校验，无法靠 MITM 植入更新文件

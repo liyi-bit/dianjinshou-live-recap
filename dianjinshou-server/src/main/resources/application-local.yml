@@ -1,0 +1,81 @@
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/dianjinshou?useUnicode=true&characterEncoding=utf8&serverTimezone=UTC&allowPublicKeyRetrieval=true&useSSL=false
+    username: root
+    password: ${SPRING_DATASOURCE_PASSWORD:}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      connection-timeout: 30000
+
+  redis:
+    host: localhost
+    port: 6379
+    password:
+    database: 0
+
+  flyway:
+    enabled: false
+
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration
+
+dianjinshou:
+  jwt:
+    secret: dev-secret-key-for-dianjinshou-please-change-in-production-at-least-256-bits
+    access-token-ttl: 7200
+    refresh-token-ttl: 1296000
+  rate-limit:
+    normal: 100
+    ai: 10
+  recording:
+    max-concurrent: 10
+    max-retry: 5
+    default-segment-minutes: 30
+    disk-warn-percent: 10
+    disk-stop-percent: 5
+  asr:
+    provider: disabled
+    ffmpeg-path: D:/360Downloads/IdeaProjects/dianjinshou/dianjinshou-desktop/node_modules/ffmpeg-static/ffmpeg.exe
+  ai:
+    provider: yunwu
+    yunwu-api-key: ${YUNWU_API_KEY:}
+    yunwu-endpoint: https://api.yunwu.ai/v1
+    yunwu-model: gpt-4o-mini
+  sms:
+    enabled: true
+    bypass-code: "1234"
+    code-ttl-seconds: 300
+    throttle-seconds: 60
+    phone-hour-limit: 10
+    phone-day-limit: 20
+    ip-day-limit: 50
+    dahan:
+      endpoint: https://dhst.bangkao.com/json/sms/Submit
+      account: ${SMS_DAHAN_ACCOUNT:}
+      password: ${SMS_DAHAN_PASSWORD:}
+      sign: 重庆学东科技
+
+storage:
+  type: minio
+  endpoint: ${STORAGE_ENDPOINT:}
+  access-key: ${STORAGE_ACCESS_KEY:}
+  secret-key: ${STORAGE_SECRET_KEY:}
+  bucket-recordings: ${STORAGE_BUCKET_RECORDINGS:}
+  bucket-files: ${STORAGE_BUCKET_FILES:}
+  bucket-clips: ${STORAGE_BUCKET_CLIPS:}
+  presigned-url-expire-seconds: 3600
+
+tencent:
+  cos:
+    enabled: ${TENCENT_COS_ENABLED:false}
+    secret-id: ${TENCENT_COS_SECRET_ID:}
+    secret-key: ${TENCENT_COS_SECRET_KEY:}
+    bucket: ${TENCENT_COS_BUCKET:}
+    region: ap-beijing
+    endpoint: ${TENCENT_COS_ENDPOINT:}
+    quota-bytes: 21474836480
+    read-url-expire-hours: 24
+    upload-credential-expire-seconds: 1800

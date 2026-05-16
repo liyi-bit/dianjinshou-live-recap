@@ -1,0 +1,30 @@
+-- V5: 短视频切片表 (v2.0)
+
+CREATE TABLE IF NOT EXISTS short_clips (
+    id              BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id         BIGINT        NOT NULL,
+    org_id          BIGINT        NOT NULL,
+    recording_id    BIGINT        NULL      COMMENT '关联录制记录',
+    source_type     VARCHAR(32)   NOT NULL  COMMENT 'recording/file_analysis',
+    source_id       BIGINT        NOT NULL  COMMENT '来源ID',
+    clip_name       VARCHAR(256)  NOT NULL,
+    start_time      INT           NOT NULL  COMMENT '起始秒数',
+    end_time        INT           NOT NULL  COMMENT '结束秒数',
+    duration        INT           NOT NULL  COMMENT '时长(秒)',
+    resolution      VARCHAR(16)   NOT NULL  DEFAULT 'original' COMMENT 'original/720p/1080p',
+    watermark_text  VARCHAR(128)  NULL,
+    output_format   VARCHAR(16)   NOT NULL  DEFAULT 'mp4',
+    local_file_path VARCHAR(1024) NULL,
+    storage_key     VARCHAR(512)  NULL,
+    file_size       BIGINT        NOT NULL  DEFAULT 0,
+    status          VARCHAR(20)   NOT NULL  DEFAULT 'pending' COMMENT 'pending/processing/completed/failed/exported',
+    error_msg       TEXT          NULL,
+    deleted         TINYINT       NOT NULL  DEFAULT 0,
+    created_at      DATETIME(3)   NOT NULL  DEFAULT CURRENT_TIMESTAMP(3),
+    updated_at      DATETIME(3)   NOT NULL  DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+    INDEX idx_user (user_id),
+    INDEX idx_org (org_id),
+    INDEX idx_recording (recording_id),
+    INDEX idx_status (status),
+    INDEX idx_source (source_type, source_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='短视频切片';

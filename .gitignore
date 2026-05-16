@@ -1,0 +1,39 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+out/
+target/
+.vite/
+.cache/
+
+# Local environment files
+.env
+.env.*
+!.env.example
+!.env.*.example
+
+# Logs and runtime output
+*.log
+run-logs/
+server-local-*.out.log
+server-local-*.err.log
+
+# Test and tooling artifacts
+coverage/
+playwright-report/
+test-results/
+*.tsbuildinfo
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Local visual check artifacts
+*-style-check.png
+*-layout-check.png
+*-comparison-*.png

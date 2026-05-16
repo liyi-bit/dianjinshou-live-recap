@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>我的主播 - 点金手</title>
+<link rel="stylesheet" href="/assets/streamer-list.css">
+</head>
+<body>
+<div class="container">
+  <div class="page-head">
+    <div>
+      <div class="page-title">我的主播</div>
+      <div class="page-desc">展示当前登录账号名下的主播。</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <a class="btn ghost" href="/all-streamers.html">查看主播库 →</a>
+      <div id="userBox" style="display:none">
+        <span id="userChip" class="user-chip"><span class="dot" id="userInitial">?</span><span id="userPhone">—</span></span>
+        <button id="logoutBtn" class="btn ghost" style="margin-left:8px">退出</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <input id="searchInput" class="search-input" placeholder="搜索主播昵称" autocomplete="off">
+    <button id="searchBtn" class="btn">查询</button>
+    <button id="resetBtn" class="btn ghost">重置</button>
+  </div>
+
+  <div class="card">
+    <table class="tbl">
+      <thead>
+        <tr>
+          <th style="width:38%">主播</th>
+          <th>平台</th>
+          <th>账号 ID</th>
+          <th style="text-align:right">累计场次</th>
+          <th style="text-align:right">今日场次</th>
+          <th>最后开播</th>
+        </tr>
+      </thead>
+      <tbody id="tbody">
+        <tr><td colspan="6" class="loading">等待登录…</td></tr>
+      </tbody>
+    </table>
+    <div class="pager">
+      <span class="info" id="pageInfo">—</span>
+      <button id="prevBtn" class="btn ghost" disabled>上一页</button>
+      <button id="nextBtn" class="btn ghost" disabled>下一页</button>
+    </div>
+  </div>
+</div>
+
+<!-- 登录弹窗 -->
+<div id="loginModal" class="modal-backdrop" style="display:none">
+  <div class="modal">
+    <div class="modal-title">登录查看我的主播</div>
+    <div class="form-row">
+      <label>手机号</label>
+      <input id="phoneInput" type="tel" inputmode="numeric" maxlength="11" placeholder="11 位手机号">
+    </div>
+    <div class="form-row">
+      <label>密码</label>
+      <input id="passwordInput" type="password" placeholder="输入账号密码">
+    </div>
+    <div id="loginErr" class="form-err"></div>
+    <div class="modal-actions">
+      <button id="loginBtn" class="btn">登录</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const PLATFORM_LABEL = { douyin: '抖音', kuaishou: '快手', shipinhao: '视频号' };
+const ACCOUNT_TYPE_LABEL = { own: '自有账号', industry: '同行业账号' };
+
+const state = { page: 1, size: 20, total: 0, keyword: '' };
+let token = localStorage.getItem('djs_token') || '';
+let phone = localStorage.getItem('djs_phone') || '';
+
+function fmtTime(iso) {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return iso;
+  const pad = (n) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+function escapeHtml(s) {
+  if (s == null) return '';
+  return String(s).replace(/[&<>"']/g, (c) => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+}
+
+function renderAvatar(s) {
+  const firstChar = (s.anchorName || '?').charAt(0);
+  const gCls = s.platform === 'kuaishou' ? 'g2' : s.platform === 'shipinhao' ? 'g3' : '';
+  const pfCls = s.platform || '';
+  const pfLabel = (PLATFORM_LABEL[s.platform] || '').charAt(0);
+  const avatarImg = s.anchorAvatar
+    ? `<img src="${escapeHtml(s.anchorAvatar)}" alt="" referrerpolicy="no-referrer" onerror="this.style.display='none';this.nextElementSibling.style.display=''">`
+    : '';
+  const textFallback = `<span${s.anchorAvatar ? ' style="display:none"' : ''}>${escapeHtml(firstChar)}</span>`;
+  return `<div class="av ${gCls}">${avatarImg}${textFallback}${pfLabel ? `<span class="pf ${pfCls}">${pfLabel}</span>` : ''}</div>`;
+}
+
+function renderRow(s) {
+  return `
+    <tr>
+      <td>
+        <div class="anchor-cell">
+          ${renderAvatar(s)}
+          <div>
+            <div class="anchor-name">${escapeHtml(s.anchorName) || '—'}</div>
+            <div class="anchor-meta">
+              <span class="badge ${s.accountType === 'own' ? 'own' : 'peer'}">${escapeHtml(ACCOUNT_TYPE_LABEL[s.accountType] || s.accountType || '')}</span>
+            </div>
+          </div>
+        </div>
+      </td>
+      <td>${escapeHtml(PLATFORM_LABEL[s.platform] || s.platform || '—')}</td>
+      <td><span class="account-id">${escapeHtml(s.accountId || '—')}</span></td>
+      <td style="text-align:right"><span class="num">${s.totalSessions ?? 0}</span></td>
+      <td style="text-align:right"><span class="num">${s.todaySessions ?? 0}</span></td>
+      <td><span class="time">${fmtTime(s.lastLiveAt)}</span></td>
+    </tr>
+  `;
+}
+
+function showLogin() {
+  document.getElementById('loginModal').style.display = 'flex';
+  document.getElementById('loginErr').textContent = '';
+  document.getElementById('phoneInput').value = phone;
+  setTimeout(() => document.getElementById(phone ? 'passwordInput' : 'phoneInput').focus(), 50);
+  document.getElementById('tbody').innerHTML = '<tr><td colspan="6" class="loading">请先登录。</td></tr>';
+  document.getElementById('userBox').style.display = 'none';
+}
+
+function hideLogin() {
+  document.getElementById('loginModal').style.display = 'none';
+}
+
+function renderUserBox() {
+  if (token && phone) {
+    document.getElementById('userBox').style.display = 'inline-flex';
+    document.getElementById('userPhone').textContent = phone.slice(0, 3) + '****' + phone.slice(7);
+    document.getElementById('userInitial').textContent = phone.slice(-1);
+  } else {
+    document.getElementById('userBox').style.display = 'none';
+  }
+}
+
+async function load() {
+  if (!token) { showLogin(); return; }
+  const tbody = document.getElementById('tbody');
+  tbody.innerHTML = '<tr><td colspan="6" class="loading">加载中…</td></tr>';
+
+  const params = new URLSearchParams({ page: state.page, size: state.size });
+  if (state.keyword) params.set('keyword', state.keyword);
+
+  try {
+    const resp = await fetch(`/api/v1/streamers?${params}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (resp.status === 401) {
+      token = '';
+      localStorage.removeItem('djs_token');
+      showLogin();
+      return;
+    }
+    const body = await resp.json();
+    if (body.code !== 200) {
+      tbody.innerHTML = `<tr><td colspan="6" class="empty"><div class="ic">⚠️</div>${escapeHtml(body.message || '加载失败')}</td></tr>`;
+      return;
+    }
+    const items = body.data?.items || [];
+    state.total = body.data?.total ?? 0;
+
+    if (items.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" class="empty"><div class="ic">📋</div>你还没有添加主播</td></tr>';
+    } else {
+      tbody.innerHTML = items.map(renderRow).join('');
+    }
+    updatePager();
+  } catch (err) {
+    tbody.innerHTML = `<tr><td colspan="6" class="empty"><div class="ic">❌</div>网络错误：${escapeHtml(err.message)}</td></tr>`;
+  }
+}
+
+function updatePager() {
+  const totalPages = Math.max(1, Math.ceil(state.total / state.size));
+  document.getElementById('pageInfo').textContent = `共 ${state.total} 条 · 第 ${state.page} / ${totalPages} 页`;
+  document.getElementById('prevBtn').disabled = state.page <= 1;
+  document.getElementById('nextBtn').disabled = state.page >= totalPages;
+}
+
+async function doLogin() {
+  const phoneVal = document.getElementById('phoneInput').value.trim();
+  const password = document.getElementById('passwordInput').value;
+  if (!/^1\d{10}$/.test(phoneVal)) {
+    document.getElementById('loginErr').textContent = '请输入正确的 11 位手机号';
+    return;
+  }
+  if (!password) {
+    document.getElementById('loginErr').textContent = '请输入密码';
+    return;
+  }
+  const btn = document.getElementById('loginBtn');
+  btn.disabled = true;
+  btn.textContent = '登录中…';
+  try {
+    const resp = await fetch('/api/v1/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phone: phoneVal, password }),
+    });
+    const body = await resp.json();
+    if (body.code !== 200) {
+      document.getElementById('loginErr').textContent = body.message || '登录失败';
+      btn.disabled = false;
+      btn.textContent = '登录';
+      return;
+    }
+    token = body.data.accessToken;
+    phone = phoneVal;
+    localStorage.setItem('djs_token', token);
+    localStorage.setItem('djs_phone', phone);
+    hideLogin();
+    renderUserBox();
+    state.page = 1;
+    load();
+  } catch (err) {
+    document.getElementById('loginErr').textContent = '网络错误：' + err.message;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '登录';
+  }
+}
+
+document.getElementById('searchBtn').addEventListener('click', () => {
+  state.keyword = document.getElementById('searchInput').value.trim();
+  state.page = 1; load();
+});
+document.getElementById('resetBtn').addEventListener('click', () => {
+  document.getElementById('searchInput').value = '';
+  state.keyword = ''; state.page = 1; load();
+});
+document.getElementById('searchInput').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') document.getElementById('searchBtn').click();
+});
+document.getElementById('prevBtn').addEventListener('click', () => { if (state.page > 1) { state.page--; load(); } });
+document.getElementById('nextBtn').addEventListener('click', () => { state.page++; load(); });
+document.getElementById('loginBtn').addEventListener('click', doLogin);
+document.getElementById('passwordInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') doLogin(); });
+document.getElementById('logoutBtn').addEventListener('click', () => {
+  token = ''; phone = '';
+  localStorage.removeItem('djs_token');
+  localStorage.removeItem('djs_phone');
+  renderUserBox();
+  showLogin();
+});
+
+renderUserBox();
+load();
+</script>
+</body>
+</html>
